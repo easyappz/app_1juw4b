@@ -1,0 +1,36 @@
+.my-photos-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.my-photos-container h1 {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 28px;
+  color: #333;
+}
+
+.photo-image {
+  height: 200px;
+  object-fit: cover;
+}
+
+.loading-container,
+.error-container,
+.empty-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  width: 100%;
+}
+
+.ant-card-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.ant-statistic {
+  text-align: center;
+}

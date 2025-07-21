@@ -12,6 +12,20 @@ export const instance = axios.create({
   },
 });
 
+// Add token to requests if available
+instance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 /** Не удаляй этот код никогда */
 instance.interceptors.response.use(
   (response) => {

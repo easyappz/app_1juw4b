@@ -15,28 +15,47 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5000000 }, // Limit file size to 5MB
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|gif/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only images are allowed!'));
+    }
+  },
+}).single('photo');
 
 // Upload photo
-router.post('/upload', authMiddleware, upload.single('photo'), async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+router.post('/upload', authMiddleware, (req, res) => {
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: 'File upload error', error: err.message });
     }
+    try {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
 
-    const photo = new Photo({
-      userId: req.user.id,
-      url: `/uploads/${req.file.filename}`,
-      gender: user.gender,
-      age: user.age,
-    });
-    await photo.save();
+      const photo = new Photo({
+        userId: req.user.id,
+        url: `/uploads/${req.file.filename}`,
+        gender: user.gender,
+        age: user.age,
+      });
+      await photo.save();
 
-    res.status(201).json({ message: 'Photo uploaded', photo });
-  } catch (error) {
-    res.status(500).json({ message: 'Error uploading photo', error: error.message });
-  }
+      res.status(201).json({ message: 'Photo uploaded', photo });
+    } catch (error) {
+      res.status(500).json({ message: 'Error uploading photo', error: error.message });
+    }
+  });
 });
 
 // Get photos for rating (filtered by gender and age)
